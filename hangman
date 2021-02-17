@@ -1,0 +1,143 @@
+from random import randint
+
+# Συνάρτηση που βοηθάει να εξαφανίσω τη λέξη
+def cls():
+    print('\n'*100)
+
+
+# Συνάρτηση για τον κρεμασμένο
+def printhanger(tries, maxtries):
+    print('+-----+')
+    if tries < 5:
+        print('|     o')
+        if tries < 4:
+            if tries == 3:
+                print('|   --+')
+                print('|')
+            else:
+                print('|   --+--')
+                if tries < 2:
+                    if tries == 1:
+                        print('|     /')
+                    else:
+                        print("|     /\\")
+                else:
+                    print('|')
+        else:
+            print('|')
+            print('|')
+    else:
+        print('|')
+        print('|')
+        print('|')
+
+
+print("Welcome to KREMALA!")
+while True:
+    # Διαβάζω τις επιλογές του χρήστη
+    sel = input('Type g<Enter> or G<Enter> if word will be given by another player: ')
+    if sel=='g' or sel=='G':
+
+        # Εξετάζω επαναληπτικα αν υπάρχει η λεξη στη λίστα
+        done = False
+        while not done:
+            word = input("Player don't look! 2nd player, type in word, must be in English and at least 3 letters long: ")
+            cls()
+            fp = open('words.txt','r')
+            text = fp.readline()
+            while text:
+                if word == (text.strip('\n')):
+                    done = True
+                    break
+                text = fp.readline()
+            fp.close()
+    else:
+        sel_len = input("Type r<Enter> or R<Enter> for word of random length, else give length of random word (between 3 and 20): ")
+        if sel_len =='r' or sel_len=='R':
+            # Επιλέγω random το μήκος της λεξης
+            length = randint(3,20)
+        else:
+            # Ελέγχω αν αυτό που δίνει ο χρήστης ειναι αριθμός με την μέθοδο isdigit() και αν παραβιάζει τα όρια του [3,20]
+            while not sel_len.isdigit() or int(sel_len) < 3 or int(sel_len) > 20 :
+                sel_len = input('Give a valid number between 3 and 20: ')
+            length = int(sel_len)
+
+        # Κανω append σε μια λίστα όλες τις λέξεις από το αρχειο με μήκος ίδιο με το length
+        lstw = []
+        fp = open('words.txt','r')
+        text = fp.readline()
+        while text:
+            text = fp.readline()
+            text = text.strip('\n')
+            if len(text) == length:
+                lstw.append(text)
+        fp.close()
+
+        # Επιλεγω τυχαία από τη λίστα
+        word = lstw[randint(0, len(lstw)-1)]
+        print(word)
+        cls()
+       
+    # Μεταβλητή για τις αποτυχημένες προσπάθειες
+    tries = 5
+    word = word.upper()
+    
+    # Λίστα με τους χρησιμοποίημενους χαρακτήρες
+    used = []
+    # Λιστα με _ και χαρακτήρες που έχουν βρεθεί
+    success = []
+
+    for i in range (len(word)):
+        success.append('_')
+
+    
+    # Επανάληψη που παιζεται το παιχνίδι για μια λέξη
+    while True:
+        # Εδω συγκεντρώνω όλη την έξοδο που πραγματοποιειται σε κάθε γύρο
+        printhanger(tries, 5)
+        print(f"{tries} tries left")
+        for i in range (len(word)):
+            print(success[i], end=" ")
+        print('\n')
+        print('Choosen letters:', used)
+
+        # Δεν δέχεται το παιχνίδι σύμβολα και πολλούς χαρακτήρες μαζι
+        while True:
+            letter = input("Guess letter:").upper()
+            if len(letter) == 1:
+                if ord(letter) >= 65 and ord(letter) <= 90:
+                    break
+        
+        # Δεν μάντεψε σωστά ο παικτης και το γράμμα δεν υπάρχει στη λίστα με τις λαθος επιλογές
+        if letter not in word and letter not in used:
+            used.append(letter)
+            tries -= 1
+            if tries == 0:
+                printhanger(tries,5)
+                print(f"Sorry! You lost! The word was {word}.")
+                break
+
+        # Tο γράμμα υπάρχει στη λίστα με τις λαθος επιλογές
+        elif letter in used:
+            print('The letter ', letter, ' has been choosen.')
+        
+        # Μάντεψε σωστά ο παικτης
+        else:
+        # Ο index είναι ένας δείκτης που με βοηθάει σε περιπτωση που το γράμμα υπάρχει πάνω από μια φορά. 
+        # Οπότε διασχίζω όλους τους χαρακτήρες της λεξης ενα προς ενα.
+
+            index = 0
+            for x in word:
+                if x == letter:
+                    success[index] = letter
+                index += 1
+            
+            used.append(letter)
+            if '_' not in success:
+                # Άρα η λέξη βρέθηκε από τον παικτη
+                print(f"Congratulatios! You have found {word}!")
+                break
+    
+    again = input('Type P<Enter> or p<Enter> to play again:')   
+    if not (again=='p' or again=='P'):
+        break
